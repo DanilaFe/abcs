@@ -60,6 +60,7 @@ class abacus_ref {
         abacus_ref(void* data, void (*free_func)(void*));
         abacus_ref(const abacus_ref& other);
         abacus_ref& operator=(const abacus_ref& other);
+        abacus_ref& operator=(std::nullptr_t);
         operator libab_ref*() {
             return &ref;
         }
@@ -80,6 +81,12 @@ abacus_ref::abacus_ref(const abacus_ref& other) {
 
 abacus_ref& abacus_ref::operator=(const abacus_ref& other) {
     libab_ref_copy(&other.ref, &ref);
+    return *this;
+}
+
+abacus_ref& abacus_ref::operator=(std::nullptr_t t) {
+    libab_ref_free(&ref);
+    libab_ref_null(&ref);
     return *this;
 }
 
@@ -180,10 +187,12 @@ void abacus::add_function(const std::string& name, libab_function_ptr ptr, const
 abacus_ref abacus::run(const std::string& code) {
     abacus_ref value;
     libab_run_scoped(&ab, code.c_str(), scope, value);
+    libab_gc_run(&ab.containers);
     return value;
 }
 
 abacus::~abacus() {
+    scope = nullptr;
     libab_free(&ab);
 }
 
@@ -195,5 +204,5 @@ int main() {
     ab.add_function("minus", function_minus, "(num, num)->num");
     ab.add_function("times", function_times, "(num, num)->num");
     ab.add_function("divide", function_divide, "(num, num)->num");
-    ab.run("print(to_string(plus(1, times(3, 3))))");
+    ab.run("fun test(): unit {}; print(to_string(plus(1, times(3, 3))))");
 }
