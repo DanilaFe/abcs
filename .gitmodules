@@ -1,0 +1,3 @@
+[submodule "external/libabacus"]
+	path = external/libabacus
+	url = https://dev.danilafe.com/Experiments/libabacus
