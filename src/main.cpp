@@ -6,6 +6,9 @@ extern "C" {
 #include "util.h"
 }
 
+// == Global State (uh-oh)
+bool close_requested = false;
+
 // == STRING Type
 struct string {
     std::string value;
@@ -61,6 +64,8 @@ class abacus_ref {
         abacus_ref(const abacus_ref& other);
         abacus_ref& operator=(const abacus_ref& other);
         abacus_ref& operator=(std::nullptr_t);
+        template <typename T>
+        bool operator==(T data);
         operator libab_ref*() {
             return &ref;
         }
@@ -88,6 +93,16 @@ abacus_ref& abacus_ref::operator=(std::nullptr_t t) {
     libab_ref_free(&ref);
     libab_ref_null(&ref);
     return *this;
+}
+
+template <typename T>
+bool abacus_ref::operator==(T data) {
+    return libab_ref_get(&ref) == (void*) data;
+}
+
+template <>
+bool abacus_ref::operator==<std::nullptr_t>(std::nullptr_t t) {
+    return libab_ref_get(&ref) == t;
 }
 
 abacus_ref::~abacus_ref() {
@@ -148,6 +163,12 @@ OPERATOR_FUNCTION(minus, -)
 OPERATOR_FUNCTION(times, *)
 OPERATOR_FUNCTION(divide, /)
 
+FUNCTION(quit) {
+    close_requested = true;
+    libab_get_unit_value(ab, into);
+    return LIBAB_SUCCESS;
+}
+
 // == Main class
 class abacus {
     private:
@@ -198,11 +219,24 @@ abacus::~abacus() {
 
 int main() {
     abacus ab;
+    std::string buffer;
+
+    ab.add_function("quit", function_quit, "()->unit");
+
     ab.add_function("print", function_print_string, "(str)->unit");
     ab.add_function("to_string", function_to_string_num, "(num)->str");
+
     ab.add_function("plus", function_plus, "(num, num)->num");
     ab.add_function("minus", function_minus, "(num, num)->num");
     ab.add_function("times", function_times, "(num, num)->num");
     ab.add_function("divide", function_divide, "(num, num)->num");
-    ab.run("fun test(): unit {}; print(to_string(plus(1, times(3, 3))))");
+
+    while(!close_requested) {
+        std::cout << "> ";
+        std::getline(std::cin, buffer);
+        abacus_ref value = ab.run(buffer);
+        if(value == nullptr) {
+            std::cout << "Invalid expression." << std::endl;
+        }
+    }
 }
