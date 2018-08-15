@@ -222,6 +222,9 @@ class abacus {
     public:
         abacus();
         void add_function(const std::string& name, libab_function_ptr ptr, const std::string& type);
+        void add_operator_infix(const std::string& op, const std::string& func, int assoc, int prec);
+        void add_operator_prefix(const std::string& op, const std::string& func);
+        void add_operator_postfix(const std::string& op, const std::string& func);
         abacus_ref run(const std::string& code);
         template <typename ... Ts>
         abacus_ref call(const std::string& bane, Ts...params);
@@ -249,6 +252,16 @@ void abacus::add_function(const std::string& name, libab_function_ptr ptr, const
         libab_create_type(&ab, new_ref, type.c_str());
         libab_register_function(&ab, name.c_str(), new_ref, ptr);
     }
+}
+
+void abacus::add_operator_infix(const std::string& op, const std::string& func, int assoc, int prec) {
+    libab_register_operator_infix(&ab, op.c_str(), prec, assoc, func.c_str());
+}
+void abacus::add_operator_prefix(const std::string& op, const std::string& func) {
+    libab_register_operator_prefix(&ab, op.c_str(), func.c_str());
+}
+void abacus::add_operator_postfix(const std::string& op, const std::string& func) {
+    libab_register_operator_postfix(&ab, op.c_str(), func.c_str());
 }
 
 abacus_ref abacus::run(const std::string& code) {
@@ -301,6 +314,12 @@ int main() {
     ab.add_function("times", function_times, "(num, num)->num");
     ab.add_function("divide", function_divide, "(num, num)->num");
     ab.add_function("negate", function_negate, "(num)->num");
+
+    ab.add_operator_infix("+", "plus", 1, -1);
+    ab.add_operator_infix("-", "minus", 1, -1);
+    ab.add_operator_infix("*", "times", 2, -1);
+    ab.add_operator_infix("/", "divide", 2, -1);
+    ab.add_operator_prefix("-", "negate");
 
     while(!close_requested) {
         std::cout << "> ";
