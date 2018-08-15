@@ -315,10 +315,10 @@ int main() {
     ab.add_function("divide", function_divide, "(num, num)->num");
     ab.add_function("negate", function_negate, "(num)->num");
 
-    ab.add_operator_infix("+", "plus", 1, -1);
-    ab.add_operator_infix("-", "minus", 1, -1);
-    ab.add_operator_infix("*", "times", 2, -1);
-    ab.add_operator_infix("/", "divide", 2, -1);
+    ab.add_operator_infix("+", "plus", -1, 2);
+    ab.add_operator_infix("-", "minus", -1, 2);
+    ab.add_operator_infix("*", "times", -1, 3);
+    ab.add_operator_infix("/", "divide", -1, 3);
     ab.add_operator_prefix("-", "negate");
 
     while(!close_requested) {
