@@ -3,11 +3,15 @@
 #include <mpfr.h>
 extern "C" {
 #include "libabacus.h"
+#include "value.h"
 #include "util.h"
 }
 
+#define PRECISION 200
+
 // == Global State (uh-oh)
 bool close_requested = false;
+long requested_precision = 3;
 
 // == STRING Type
 struct string {
@@ -20,34 +24,38 @@ struct string {
 struct number {
     mpfr_t value;
     number(const char* new_value) {
-        mpfr_init_set_str(value, new_value, 10, MPFR_RNDN);
+        mpfr_init2(value, PRECISION);
+        mpfr_set_str(value, new_value, 10, MPFR_RNDN);
     }
     number(mpfr_t&& new_value) {
         std::swap(value, new_value);
     }
     number* operator+(const number& right) {
         mpfr_t new_value;
-        mpfr_init(new_value);
+        mpfr_init2(new_value, 200);
         mpfr_add(new_value, value, right.value, MPFR_RNDN);
         return new number(std::move(new_value));
     }
     number* operator-(const number& right) {
         mpfr_t new_value;
-        mpfr_init(new_value);
+        mpfr_init2(new_value, 200);
         mpfr_sub(new_value, value, right.value, MPFR_RNDN);
         return new number(std::move(new_value));
     }
     number* operator*(const number& right) {
         mpfr_t new_value;
-        mpfr_init(new_value);
+        mpfr_init2(new_value, 200);
         mpfr_mul(new_value, value, right.value, MPFR_RNDN);
         return new number(std::move(new_value));
     }
     number* operator/(const number& right) {
         mpfr_t new_value;
-        mpfr_init(new_value);
+        mpfr_init2(new_value, 200);
         mpfr_div(new_value, value, right.value, MPFR_RNDN);
         return new number(std::move(new_value));
+    }
+    int to_int() {
+        return mpfr_get_si(value, MPFR_RNDN);
     }
     ~number() {
         mpfr_clear(value);
@@ -143,8 +151,13 @@ FUNCTION(print_string) {
 FUNCTION(to_string_num) {
     number* num = (number*) libab_unwrap_param(params, 0);
     mpfr_exp_t exp;
-    char* str = mpfr_get_str(NULL, &exp, 10, 0, num->value, MPFR_RNDN);
-    abacus_ref value = create_value(ab, new string(std::string(str).insert(exp, 1, '.')));
+    char* str = mpfr_get_str(NULL, &exp, 10, requested_precision, num->value, MPFR_RNDN);
+    std::string output_string = std::string(str).insert(1, 1, '.');
+    if(exp != 1) {
+        output_string += "e";
+        output_string += std::to_string(exp - 1);
+    }
+    abacus_ref value = create_value(ab, new string(std::move(output_string)));
     libab_ref_copy(value, into);
     mpfr_free_str(str);
     return LIBAB_SUCCESS;
@@ -169,6 +182,13 @@ FUNCTION(quit) {
     return LIBAB_SUCCESS;
 }
 
+FUNCTION(request_precision) {
+    number* value = (number*) libab_unwrap_param(params, 0);
+    requested_precision = std::min(PRECISION / 4, std::max(2, value->to_int()));
+    libab_get_unit_value(ab, into);
+    return LIBAB_SUCCESS;
+}
+
 // == Main class
 class abacus {
     private:
@@ -180,6 +200,9 @@ class abacus {
         abacus();
         void add_function(const std::string& name, libab_function_ptr ptr, const std::string& type);
         abacus_ref run(const std::string& code);
+        template <typename ... Ts>
+        abacus_ref call(const std::string& bane, Ts...params);
+        std::string to_string(abacus_ref& value);
         ~abacus();
 };
 
@@ -212,16 +235,38 @@ abacus_ref abacus::run(const std::string& code) {
     return value;
 }
 
+template <typename ... Ts>
+abacus_ref abacus::call(const std::string& name, Ts...params) {
+    abacus_ref value;
+    libab_run_function_scoped(&ab, name.c_str(), scope, value, sizeof...(params), (libab_ref*) params...);
+    libab_gc_run(&ab.containers);
+    return value;
+}
+
+
+template <typename T>
+T* get(libab_ref* ref) {
+    return (T*) libab_ref_get(ref);
+}
+
+std::string abacus::to_string(abacus_ref& val) {
+    abacus_ref string_value = call("to_string", val);
+    if(string_value == nullptr) return "Unable to convert to string.";
+    libab_basetype* base = get<libab_parsetype>(&get<libab_value>(string_value)->type)->data_u.base;
+    if(base != &basetype_string) return "\"to_string\" did not return string.";
+    return get<string>(&get<libab_value>(string_value)->data)->value;
+}
+
 abacus::~abacus() {
     scope = nullptr;
     libab_free(&ab);
 }
-
 int main() {
     abacus ab;
     std::string buffer;
 
     ab.add_function("quit", function_quit, "()->unit");
+    ab.add_function("request_precision", function_request_precision, "(num)->unit");
 
     ab.add_function("print", function_print_string, "(str)->unit");
     ab.add_function("to_string", function_to_string_num, "(num)->str");
@@ -237,6 +282,8 @@ int main() {
         abacus_ref value = ab.run(buffer);
         if(value == nullptr) {
             std::cout << "Invalid expression." << std::endl;
+        } else {
+            std::cout << ab.to_string(value) << std::endl;
         }
     }
 }
