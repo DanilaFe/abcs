@@ -152,7 +152,7 @@ FUNCTION(to_string_num) {
     number* num = (number*) libab_unwrap_param(params, 0);
     mpfr_exp_t exp;
     char* str = mpfr_get_str(NULL, &exp, 10, requested_precision, num->value, MPFR_RNDN);
-    std::string output_string = std::string(str).insert(1, 1, '.');
+    std::string output_string = std::string(str).insert((mpfr_sgn(num->value) < 0) ? 2 : 1, 1, '.');
     if(exp != 1) {
         output_string += "e";
         output_string += std::to_string(exp - 1);
@@ -188,6 +188,16 @@ OPERATOR_FUNCTION(plus, +)
 OPERATOR_FUNCTION(minus, -)
 OPERATOR_FUNCTION(times, *)
 OPERATOR_FUNCTION(divide, /)
+
+FUNCTION(negate) {
+    number* value = (number*) libab_unwrap_param(params, 0);
+    mpfr_t negative;
+    mpfr_init2(negative, PRECISION);
+    mpfr_neg(negative, value->value, MPFR_RNDN);
+    abacus_ref to_return = create_value<number>(ab, new number(std::move(negative)));
+    libab_ref_copy(to_return, into);
+    return LIBAB_SUCCESS;
+}
 
 FUNCTION(quit) {
     close_requested = true;
@@ -290,6 +300,7 @@ int main() {
     ab.add_function("minus", function_minus, "(num, num)->num");
     ab.add_function("times", function_times, "(num, num)->num");
     ab.add_function("divide", function_divide, "(num, num)->num");
+    ab.add_function("negate", function_negate, "(num)->num");
 
     while(!close_requested) {
         std::cout << "> ";
