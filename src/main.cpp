@@ -163,6 +163,19 @@ FUNCTION(to_string_num) {
     return LIBAB_SUCCESS;
 }
 
+FUNCTION(to_string_bool) {
+    int* val = (int*) libab_unwrap_param(params, 0);
+    abacus_ref value = create_value(ab, new string(*val ? "true" : "false"));
+    libab_ref_copy(value, into);
+    return LIBAB_SUCCESS;
+}
+
+FUNCTION(to_string_unit) {
+    abacus_ref value = create_value(ab, new string("()"));
+    libab_ref_copy(value, into);
+    return LIBAB_SUCCESS;
+}
+
 #define OPERATOR_FUNCTION(name, op) FUNCTION(name) { \
     number* left = (number*) libab_unwrap_param(params, 0); \
     number* right = (number*) libab_unwrap_param(params, 1); \
@@ -270,6 +283,8 @@ int main() {
 
     ab.add_function("print", function_print_string, "(str)->unit");
     ab.add_function("to_string", function_to_string_num, "(num)->str");
+    ab.add_function("to_string", function_to_string_bool, "(bool)->str");
+    ab.add_function("to_string", function_to_string_unit, "(unit)->str");
 
     ab.add_function("plus", function_plus, "(num, num)->num");
     ab.add_function("minus", function_minus, "(num, num)->num");
