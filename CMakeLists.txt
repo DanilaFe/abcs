@@ -7,6 +7,6 @@ set(CMAKE_CXX_STANDARD 11)
 
 add_subdirectory(external/libabacus)
 add_executable(cmdAbacus src/main.cpp)
-target_link_libraries(cmdAbacus abacus ${MPFR_LIBRARIES})
+target_link_libraries(cmdAbacus abacus ${MPFR_LIBRARIES} readline)
 target_include_directories(cmdAbacus PUBLIC include ${MPFR_INCLUDE_DIRS})
 target_compile_options(cmdAbacus PUBLIC ${MPFR_CFLAGS_OTHER})

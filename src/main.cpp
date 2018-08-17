@@ -1,6 +1,8 @@
 #include <iostream>
 #include <map>
 #include <mpfr.h>
+#include <readline/readline.h>
+#include <readline/history.h>
 extern "C" {
 #include "libabacus.h"
 #include "value.h"
@@ -299,7 +301,7 @@ abacus::~abacus() {
 }
 int main() {
     abacus ab;
-    std::string buffer;
+    rl_bind_key('\t', rl_insert);
 
     ab.add_function("quit", function_quit, "()->unit");
     ab.add_function("request_precision", function_request_precision, "(num)->unit");
@@ -322,8 +324,11 @@ int main() {
     ab.add_operator_prefix("-", "negate");
 
     while(!close_requested) {
-        std::cout << "> ";
-        std::getline(std::cin, buffer);
+        char* data = readline(" > ");
+        std::string buffer(data);
+        add_history(data);
+        free(data);
+
         abacus_ref value = ab.run(buffer);
         if(value == nullptr) {
             std::cout << "Invalid expression." << std::endl;
