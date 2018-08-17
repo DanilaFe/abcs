@@ -32,30 +32,6 @@ struct number {
     number(mpfr_t&& new_value) {
         std::swap(value, new_value);
     }
-    number* operator+(const number& right) {
-        mpfr_t new_value;
-        mpfr_init2(new_value, 200);
-        mpfr_add(new_value, value, right.value, MPFR_RNDN);
-        return new number(std::move(new_value));
-    }
-    number* operator-(const number& right) {
-        mpfr_t new_value;
-        mpfr_init2(new_value, 200);
-        mpfr_sub(new_value, value, right.value, MPFR_RNDN);
-        return new number(std::move(new_value));
-    }
-    number* operator*(const number& right) {
-        mpfr_t new_value;
-        mpfr_init2(new_value, 200);
-        mpfr_mul(new_value, value, right.value, MPFR_RNDN);
-        return new number(std::move(new_value));
-    }
-    number* operator/(const number& right) {
-        mpfr_t new_value;
-        mpfr_init2(new_value, 200);
-        mpfr_div(new_value, value, right.value, MPFR_RNDN);
-        return new number(std::move(new_value));
-    }
     int to_int() {
         return mpfr_get_si(value, MPFR_RNDN);
     }
@@ -186,20 +162,44 @@ FUNCTION(to_string_unit) {
     return LIBAB_SUCCESS; \
 }
 
-OPERATOR_FUNCTION(plus, +)
-OPERATOR_FUNCTION(minus, -)
-OPERATOR_FUNCTION(times, *)
-OPERATOR_FUNCTION(divide, /)
-
-FUNCTION(negate) {
-    number* value = (number*) libab_unwrap_param(params, 0);
-    mpfr_t negative;
-    mpfr_init2(negative, PRECISION);
-    mpfr_neg(negative, value->value, MPFR_RNDN);
-    abacus_ref to_return = create_value<number>(ab, new number(std::move(negative)));
-    libab_ref_copy(to_return, into);
-    return LIBAB_SUCCESS;
+#define FUNCTION_MPFR(name, func) FUNCTION(name) { \
+    number* value = (number*) libab_unwrap_param(params, 0); \
+    mpfr_t output; \
+    mpfr_init2(output, PRECISION); \
+    mpfr_##func(output, value->value, MPFR_RNDN); \
+    abacus_ref to_return = create_value<number>(ab, new number(std::move(output))); \
+    libab_ref_copy(to_return, into); \
+    return LIBAB_SUCCESS; \
 }
+
+#define FUNCTION_MPFR2(name, func) FUNCTION(name) { \
+    number* left = (number*) libab_unwrap_param(params, 0); \
+    number* right = (number*) libab_unwrap_param(params, 1); \
+    mpfr_t output; \
+    mpfr_init2(output, PRECISION); \
+    mpfr_##func(output, left->value, right->value, MPFR_RNDN); \
+    abacus_ref to_return = create_value<number>(ab, new number(std::move(output))); \
+    libab_ref_copy(to_return, into); \
+    return LIBAB_SUCCESS; \
+}
+
+FUNCTION_MPFR2(plus, add)
+FUNCTION_MPFR2(minus, sub)
+FUNCTION_MPFR2(times, mul)
+FUNCTION_MPFR2(divide, div)
+FUNCTION_MPFR2(pow, pow);
+
+FUNCTION_MPFR(negate, neg);
+
+FUNCTION_MPFR(sin, sin);
+FUNCTION_MPFR(cos, cos);
+FUNCTION_MPFR(tan, tan);
+
+FUNCTION_MPFR(arcsin, asin);
+FUNCTION_MPFR(arccos, acos);
+FUNCTION_MPFR(arctan, atan);
+
+FUNCTION(sqrt);
 
 FUNCTION(quit) {
     close_requested = true;
@@ -315,12 +315,21 @@ int main() {
     ab.add_function("minus", function_minus, "(num, num)->num");
     ab.add_function("times", function_times, "(num, num)->num");
     ab.add_function("divide", function_divide, "(num, num)->num");
+    ab.add_function("pow", function_pow, "(num, num)->num");
     ab.add_function("negate", function_negate, "(num)->num");
+
+    ab.add_function("sin", function_sin, "(num)->num");
+    ab.add_function("cos", function_cos, "(num)->num");
+    ab.add_function("tan", function_tan, "(num)->num");
+    ab.add_function("arcsin", function_arcsin, "(num)->num");
+    ab.add_function("arccos", function_arccos, "(num)->num");
+    ab.add_function("arctan", function_arctan, "(num)->num");
 
     ab.add_operator_infix("+", "plus", -1, 2);
     ab.add_operator_infix("-", "minus", -1, 2);
     ab.add_operator_infix("*", "times", -1, 3);
     ab.add_operator_infix("/", "divide", -1, 3);
+    ab.add_operator_infix("^", "pow", 1, 3);
     ab.add_operator_prefix("-", "negate");
 
     while(!close_requested) {
