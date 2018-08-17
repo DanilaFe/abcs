@@ -189,11 +189,24 @@ FUNCTION(to_string_unit) {
     return LIBAB_SUCCESS; \
 }
 
+#define FUNCTION_COMPARE(name, op) FUNCTION(name) { \
+    number* left = (number*) libab_unwrap_param(params, 0); \
+    number* right = (number*) libab_unwrap_param(params, 1); \
+    libab_get_bool_value(ab, mpfr_cmp(left->value, right->value) op 0, into); \
+    return LIBAB_SUCCESS; \
+}
+
 FUNCTION_MPFR2(plus, add)
 FUNCTION_MPFR2(minus, sub)
 FUNCTION_MPFR2(times, mul)
 FUNCTION_MPFR2(divide, div)
 FUNCTION_MPFR2(pow, pow);
+
+FUNCTION_COMPARE(lt, <);
+FUNCTION_COMPARE(lte, <=);
+FUNCTION_COMPARE(equals, ==);
+FUNCTION_COMPARE(gt, >);
+FUNCTION_COMPARE(gte, >=);
 
 FUNCTION_MPFR(negate, neg);
 
@@ -326,6 +339,11 @@ int main() {
     ab.add_function("to_string", function_to_string_bool, "(bool)->str");
     ab.add_function("to_string", function_to_string_unit, "(unit)->str");
 
+    ab.add_function("lt", function_lt, "(num, num)->num");
+    ab.add_function("lte", function_lte, "(num, num)->num");
+    ab.add_function("equals", function_equals, "(num, num)->num");
+    ab.add_function("gt", function_gt, "(num, num)->num");
+    ab.add_function("gte", function_gte, "(num, num)->num");
     ab.add_function("plus", function_plus, "(num, num)->num");
     ab.add_function("minus", function_minus, "(num, num)->num");
     ab.add_function("times", function_times, "(num, num)->num");
@@ -344,6 +362,11 @@ int main() {
     ab.add_function("arccos", function_arccos, "(num)->num");
     ab.add_function("arctan", function_arctan, "(num)->num");
 
+    ab.add_operator_infix("<", "lt", -1, 1);
+    ab.add_operator_infix("<=", "lte", -1, 1);
+    ab.add_operator_infix("==", "equals", -1, 1);
+    ab.add_operator_infix(">", "gt", -1, 1);
+    ab.add_operator_infix(">=", "gte", -1, 1);
     ab.add_operator_infix("+", "plus", -1, 2);
     ab.add_operator_infix("-", "minus", -1, 2);
     ab.add_operator_infix("*", "times", -1, 3);
