@@ -5,6 +5,7 @@
 #include <readline/history.h>
 extern "C" {
 #include "libabacus.h"
+#include "table.h"
 #include "value.h"
 #include "util.h"
 }
@@ -57,6 +58,11 @@ class abacus_ref {
         }
         ~abacus_ref();
 };
+
+template <typename T>
+T* get(libab_ref* ref) {
+    return (T*) libab_ref_get(ref);
+}
 
 abacus_ref::abacus_ref() {
     libab_ref_null(&ref);
@@ -191,6 +197,9 @@ FUNCTION_MPFR2(pow, pow);
 
 FUNCTION_MPFR(negate, neg);
 
+FUNCTION_MPFR(ln, log);
+FUNCTION_MPFR(exp, exp);
+
 FUNCTION_MPFR(sin, sin);
 FUNCTION_MPFR(cos, cos);
 FUNCTION_MPFR(tan, tan);
@@ -223,6 +232,7 @@ class abacus {
         libab_basetype basetype_string = { [](void* s) { delete ((string*) s); }, NULL, 0 };
     public:
         abacus();
+        void add_variable(const std::string& name, abacus_ref val);
         void add_function(const std::string& name, libab_function_ptr ptr, const std::string& type);
         void add_operator_infix(const std::string& op, const std::string& func, int assoc, int prec);
         void add_operator_prefix(const std::string& op, const std::string& func);
@@ -244,6 +254,16 @@ abacus::abacus() {
     libab_init(&ab, parse_function, free_function);
     libab_register_basetype(&ab, "str", &basetype_string);
     libab_create_table(&ab, scope, &ab.table);
+}
+
+void abacus::add_variable(const std::string& name, abacus_ref val) {
+    libab_table_entry* entry = libab_table_search_entry_value(get<libab_table>(scope), name.c_str());
+    if(entry) {
+        libab_ref_free(&entry->data_u.value);
+        libab_ref_copy(val, &entry->data_u.value);
+    } else {
+        libab_put_table_value(get<libab_table>(scope), name.c_str(), std::move(val));
+    }
 }
 
 void abacus::add_function(const std::string& name, libab_function_ptr ptr, const std::string& type) {
@@ -281,12 +301,6 @@ abacus_ref abacus::call(const std::string& name, Ts...params) {
     return value;
 }
 
-
-template <typename T>
-T* get(libab_ref* ref) {
-    return (T*) libab_ref_get(ref);
-}
-
 std::string abacus::to_string(abacus_ref& val) {
     abacus_ref string_value = call("to_string", val);
     if(string_value == nullptr) return "Unable to convert to string.";
@@ -302,6 +316,7 @@ abacus::~abacus() {
 int main() {
     abacus ab;
     rl_bind_key('\t', rl_insert);
+    size_t index = 0;
 
     ab.add_function("quit", function_quit, "()->unit");
     ab.add_function("request_precision", function_request_precision, "(num)->unit");
@@ -318,9 +333,13 @@ int main() {
     ab.add_function("pow", function_pow, "(num, num)->num");
     ab.add_function("negate", function_negate, "(num)->num");
 
+    ab.add_function("ln", function_ln, "(num)->num");
+    ab.add_function("exp", function_exp, "(num)->num");
+
     ab.add_function("sin", function_sin, "(num)->num");
     ab.add_function("cos", function_cos, "(num)->num");
     ab.add_function("tan", function_tan, "(num)->num");
+
     ab.add_function("arcsin", function_arcsin, "(num)->num");
     ab.add_function("arccos", function_arccos, "(num)->num");
     ab.add_function("arctan", function_arctan, "(num)->num");
@@ -342,7 +361,13 @@ int main() {
         if(value == nullptr) {
             std::cout << "Invalid expression." << std::endl;
         } else {
-            std::cout << ab.to_string(value) << std::endl;
+            std::string name = "r" + std::to_string(index);
+            std::string ans = "ans";
+            ab.add_variable(name, value);
+            ab.add_variable(ans, value);
+            index++;
+
+            std::cout << name << " = " << ab.to_string(value) << std::endl;
         }
     }
 }
