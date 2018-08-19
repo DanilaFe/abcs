@@ -59,6 +59,7 @@ int main() {
 
     ab.add_function("ln", function_ln, "(num)->num");
     ab.add_function("exp", function_exp, "(num)->num");
+    ab.add_function("sqrt", function_sqrt, "(num)->num");
 
     ab.add_function("sin", function_sin, "(num)->num");
     ab.add_function("cos", function_cos, "(num)->num");

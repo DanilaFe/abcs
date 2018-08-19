@@ -60,6 +60,8 @@ FUNCTION(factorial);
 FUNCTION(ln);
 FUNCTION(exp);
 
+FUNCTION(sqrt);
+
 FUNCTION(sin);
 FUNCTION(cos);
 FUNCTION(tan);
