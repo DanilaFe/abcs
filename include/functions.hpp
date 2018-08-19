@@ -55,6 +55,7 @@ FUNCTION(gt);
 FUNCTION(gte);
 
 FUNCTION(negate);
+FUNCTION(factorial);
 
 FUNCTION(ln);
 FUNCTION(exp);

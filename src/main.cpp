@@ -55,6 +55,7 @@ int main() {
     ab.add_function("divide", function_divide, "(num, num)->num");
     ab.add_function("pow", function_pow, "(num, num)->num");
     ab.add_function("negate", function_negate, "(num)->num");
+    ab.add_function("factorial", function_factorial, "(num)->num");
 
     ab.add_function("ln", function_ln, "(num)->num");
     ab.add_function("exp", function_exp, "(num)->num");
@@ -78,6 +79,7 @@ int main() {
     ab.add_operator_infix("/", "divide", -1, 3);
     ab.add_operator_infix("^", "pow", 1, 3);
     ab.add_operator_prefix("-", "negate");
+    ab.add_operator_postfix("!", "factorial");
 
     while(!close_requested) {
         char* data = readline(" > ");
