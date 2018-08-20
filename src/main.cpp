@@ -3,6 +3,8 @@
 #include <mpfr.h>
 #include <readline/readline.h>
 #include <readline/history.h>
+#include <fstream>
+#include <sstream>
 #include "types.hpp"
 #include "ref.hpp"
 #include "functions.hpp"
@@ -29,6 +31,15 @@ FUNCTION(request_precision) {
     requested_precision = std::min(PRECISION / 4, std::max(2, value->to_int()));
     libab_get_unit_value(ab, into);
     return LIBAB_SUCCESS;
+}
+
+void run_rc(abacus& ab) {
+    std::ifstream rcfile("./.abcsrc");
+    std::ostringstream str;
+    if(rcfile.good()) {
+        str << rcfile.rdbuf();
+        ab.run(str.str());
+    }
 }
 
 int main() {
@@ -82,6 +93,7 @@ int main() {
     ab.add_operator_prefix("-", "negate");
     ab.add_operator_postfix("!", "factorial");
 
+    run_rc(ab);
     while(!close_requested) {
         char* data = readline(" > ");
         std::string buffer(data);
