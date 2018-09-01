@@ -1,4 +1,5 @@
 #include "abacus.hpp"
+#include "functions.hpp"
 
 abacus::abacus() {
     auto parse_function = [](const char* s) {
@@ -40,6 +41,54 @@ void abacus::add_operator_prefix(const std::string& op, const std::string& func)
 }
 void abacus::add_operator_postfix(const std::string& op, const std::string& func) {
     libab_register_operator_postfix(&ab, op.c_str(), func.c_str());
+}
+
+void abacus::add_standard() {
+    add_function("quit", function_quit, "()->unit");
+    add_function("request_precision", function_request_precision, "(num)->unit");
+
+    add_function("print", function_print_string, "(str)->unit");
+    add_function("to_string", function_to_string_num, "(num)->str");
+    add_function("to_string", function_to_string_bool, "(bool)->str");
+    add_function("to_string", function_to_string_unit, "(unit)->str");
+
+    add_function("lt", function_lt, "(num, num)->num");
+    add_function("lte", function_lte, "(num, num)->num");
+    add_function("equals", function_equals, "(num, num)->num");
+    add_function("gt", function_gt, "(num, num)->num");
+    add_function("gte", function_gte, "(num, num)->num");
+    add_function("plus", function_plus, "(num, num)->num");
+    add_function("minus", function_minus, "(num, num)->num");
+    add_function("times", function_times, "(num, num)->num");
+    add_function("divide", function_divide, "(num, num)->num");
+    add_function("pow", function_pow, "(num, num)->num");
+    add_function("negate", function_negate, "(num)->num");
+    add_function("factorial", function_factorial, "(num)->num");
+
+    add_function("ln", function_ln, "(num)->num");
+    add_function("exp", function_exp, "(num)->num");
+    add_function("sqrt", function_sqrt, "(num)->num");
+
+    add_function("sin", function_sin, "(num)->num");
+    add_function("cos", function_cos, "(num)->num");
+    add_function("tan", function_tan, "(num)->num");
+
+    add_function("arcsin", function_arcsin, "(num)->num");
+    add_function("arccos", function_arccos, "(num)->num");
+    add_function("arctan", function_arctan, "(num)->num");
+
+    add_operator_infix("<", "lt", -1, 1);
+    add_operator_infix("<=", "lte", -1, 1);
+    add_operator_infix("==", "equals", -1, 1);
+    add_operator_infix(">", "gt", -1, 1);
+    add_operator_infix(">=", "gte", -1, 1);
+    add_operator_infix("+", "plus", -1, 2);
+    add_operator_infix("-", "minus", -1, 2);
+    add_operator_infix("*", "times", -1, 3);
+    add_operator_infix("/", "divide", -1, 3);
+    add_operator_infix("^", "pow", 1, 3);
+    add_operator_prefix("-", "negate");
+    add_operator_postfix("!", "factorial");
 }
 
 ref abacus::run(const std::string& code) {

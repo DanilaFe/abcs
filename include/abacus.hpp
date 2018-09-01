@@ -24,6 +24,7 @@ class abacus {
         void add_operator_infix(const std::string& op, const std::string& func, int assoc, int prec);
         void add_operator_prefix(const std::string& op, const std::string& func);
         void add_operator_postfix(const std::string& op, const std::string& func);
+        void add_standard();
         ref run(const std::string& code);
         template <typename ... Ts>
         ref call(const std::string& bane, Ts...params);
