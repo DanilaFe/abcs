@@ -13,6 +13,10 @@ abacus::abacus() {
     libab_create_table(&ab, scope, &ab.table);
 }
 
+const libab_basetype* abacus::get_basetype_string() {
+    return &basetype_string;
+}
+
 void abacus::add_variable(const std::string& name, ref val) {
     libab_table_entry* entry = libab_table_search_entry_value(get<libab_table>(scope), name.c_str());
     if(entry) {
