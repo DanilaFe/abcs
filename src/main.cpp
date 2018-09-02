@@ -7,7 +7,8 @@
 #include <sstream>
 #include "types.hpp"
 #include "ref.hpp"
-#include "function_utils.hpp"
+#include "repl_functions.hpp"
+#include "string_functions.hpp"
 #include "abacus.hpp"
 extern "C" {
 #include "libabacus.h"
@@ -48,6 +49,14 @@ int main() {
     size_t index = 0;
     
     ab.add_standard();
+    ab.add_function("quit", function_quit, "()->unit");
+    ab.add_function("request_precision", function_request_precision, "(num)->unit");
+
+    ab.add_function("print", function_print_string, "(str)->unit");
+    ab.add_function("to_string", function_to_string_num, "(num)->str");
+    ab.add_function("to_string", function_to_string_bool, "(bool)->str");
+    ab.add_function("to_string", function_to_string_unit, "(unit)->str");
+
     run_rc(ab);
     while(!close_requested) {
         char* data = readline(" > ");

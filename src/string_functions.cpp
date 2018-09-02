@@ -1,4 +1,7 @@
-#include "functions.hpp"
+#include "string_functions.hpp"
+#include "ref.hpp"
+#include "types.hpp"
+#include "util.hpp"
 #include <string>
 #include <iostream>
 

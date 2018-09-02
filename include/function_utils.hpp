@@ -1,5 +1,9 @@
 #pragma once
 
+extern "C" {
+#include "libabacus.h"
+}
+
 #define FUNCTION(name) libab_result function_##name( \
         libab* ab, libab_ref* scope, libab_ref_vec* params, libab_ref* into)
 

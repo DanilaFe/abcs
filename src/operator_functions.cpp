@@ -1,4 +1,11 @@
-#include "functions.hpp"
+#include "operator_functions.hpp"
+#include <mpfr.h>
+#include "types.hpp"
+#include "ref.hpp"
+#include "util.hpp"
+extern "C" {
+#include "util.h"
+}
 
 FUNCTION_MPFR2(plus, add)
 FUNCTION_MPFR2(minus, sub)

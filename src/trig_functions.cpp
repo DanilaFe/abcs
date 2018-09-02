@@ -1,4 +1,8 @@
-#include "functions.hpp"
+#include "trig_functions.hpp"
+#include <mpfr.h>
+#include "ref.hpp"
+#include "types.hpp"
+#include "util.hpp"
 
 FUNCTION_MPFR(sin, sin);
 FUNCTION_MPFR(cos, cos);

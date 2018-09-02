@@ -44,14 +44,6 @@ void abacus::add_operator_postfix(const std::string& op, const std::string& func
 }
 
 void abacus::add_standard() {
-    add_function("quit", function_quit, "()->unit");
-    add_function("request_precision", function_request_precision, "(num)->unit");
-
-    add_function("print", function_print_string, "(str)->unit");
-    add_function("to_string", function_to_string_num, "(num)->str");
-    add_function("to_string", function_to_string_bool, "(bool)->str");
-    add_function("to_string", function_to_string_unit, "(unit)->str");
-
     add_function("lt", function_lt, "(num, num)->num");
     add_function("lte", function_lte, "(num, num)->num");
     add_function("equals", function_equals, "(num, num)->num");
