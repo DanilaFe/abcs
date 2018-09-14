@@ -36,7 +36,7 @@ class abacus {
 template <typename ... Ts>
 ref abacus::call(const std::string& name, Ts...params) {
     ref value;
-    libab_run_function_scoped(&ab, name.c_str(), scope, value, sizeof...(params), (libab_ref*) params...);
+    libab_call_function_scoped(&ab, name.c_str(), scope, value, sizeof...(params), (libab_ref*) params...);
     libab_gc_run(&ab.containers);
     return value;
 }
