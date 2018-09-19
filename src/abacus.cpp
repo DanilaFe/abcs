@@ -18,13 +18,7 @@ const libab_basetype* abacus::get_basetype_string() {
 }
 
 void abacus::add_variable(const std::string& name, ref val) {
-    libab_table_entry* entry = libab_table_search_entry_value(get<libab_table>(scope), name.c_str());
-    if(entry) {
-        libab_ref_free(&entry->data_u.value);
-        libab_ref_copy(val, &entry->data_u.value);
-    } else {
-        libab_put_table_value(get<libab_table>(scope), name.c_str(), std::move(val));
-    }
+    libab_set_variable((libab_table*) libab_ref_get(&ab.table), name.c_str(), val);
 }
 
 void abacus::add_function(const std::string& name, libab_function_ptr ptr, const std::string& type) {
