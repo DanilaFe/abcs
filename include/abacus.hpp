@@ -15,6 +15,7 @@ class abacus {
     private:
         libab ab;
         ref scope;
+        ref rc_scope;
         std::map<std::string, ref> compiled_types;
         libab_basetype basetype_string = { [](void* s) { delete ((string*) s); }, NULL, 0 };
     public:
@@ -26,6 +27,7 @@ class abacus {
         void add_operator_prefix(const std::string& op, const std::string& func);
         void add_operator_postfix(const std::string& op, const std::string& func);
         void add_standard();
+        void add_rc(const std::string& file);
         ref run(const std::string& code);
         template <typename ... Ts>
         ref call(const std::string& bane, Ts...params);

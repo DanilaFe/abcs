@@ -1,5 +1,7 @@
 #include "abacus.hpp"
 #include "functions.hpp"
+#include <fstream>
+#include <sstream>
 
 abacus::abacus() {
     auto parse_function = [](const char* s) {
@@ -10,7 +12,8 @@ abacus::abacus() {
     };
     libab_init(&ab, parse_function, free_function);
     libab_register_basetype(&ab, "str", &basetype_string);
-    libab_create_table(&ab, scope, &ab.table);
+    libab_create_table(&ab, rc_scope, &ab.table);
+    libab_create_table(&ab, scope, rc_scope);
 }
 
 const libab_basetype* abacus::get_basetype_string() {
@@ -79,6 +82,17 @@ void abacus::add_standard() {
     add_operator_infix("^", "pow", 1, 3);
     add_operator_prefix("-", "negate");
     add_operator_postfix("!", "factorial");
+}
+
+void abacus::add_rc(const std::string& file) {
+    std::ifstream rcfile(file);
+    std::ostringstream str;
+    ref value;
+    if(rcfile.good()) {
+        str << rcfile.rdbuf();
+        libab_table_clear((libab_table*) libab_ref_get(rc_scope));
+        libab_run_scoped(&ab, str.str().c_str(), rc_scope, value);
+    }
 }
 
 ref abacus::run(const std::string& code) {
