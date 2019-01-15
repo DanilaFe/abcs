@@ -1,5 +1,6 @@
 # abcs
 A libabacus front end for the command-line.
+__This is a fork of abcs for CS362, Software Engineering II. Please check the upstream repo if you're not here for the class project!__
 
 ## Syntax
 Please see the libabacus documentation (external/libabacus/README.md) for a guide through the syntax.
