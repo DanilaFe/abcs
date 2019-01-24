@@ -5,7 +5,7 @@
 #include <string>
 #include <iostream>
 
-extern int requested_precision;
+long requested_precision = 3;
 
 FUNCTION(print_string) {
     string* param = (string*) libab_unwrap_param(params, 0);
@@ -39,5 +39,12 @@ FUNCTION(to_string_bool) {
 FUNCTION(to_string_unit) {
     ref value = create_value(ab, new string("()"));
     libab_ref_copy(value, into);
+    return LIBAB_SUCCESS;
+}
+
+FUNCTION(request_precision) {
+    number* value = (number*) libab_unwrap_param(params, 0);
+    requested_precision = std::min(PRECISION / 4, std::max(2, value->to_int()));
+    libab_get_unit_value(ab, into);
     return LIBAB_SUCCESS;
 }

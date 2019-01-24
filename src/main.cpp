@@ -17,7 +17,6 @@ extern "C" {
 
 // == Global State (uh-oh)
 bool close_requested = false;
-long requested_precision = 3;
 abacus abcs;
 
 FUNCTION(quit) {
@@ -28,13 +27,6 @@ FUNCTION(quit) {
 
 FUNCTION(reload_rc) {
     abcs.add_rc("./.abcsrc");
-    libab_get_unit_value(ab, into);
-    return LIBAB_SUCCESS;
-}
-
-FUNCTION(request_precision) {
-    number* value = (number*) libab_unwrap_param(params, 0);
-    requested_precision = std::min(PRECISION / 4, std::max(2, value->to_int()));
     libab_get_unit_value(ab, into);
     return LIBAB_SUCCESS;
 }
