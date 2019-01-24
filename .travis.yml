@@ -1,0 +1,10 @@
+language: cpp
+install:
+  - sudo apt-get install cmake mpfr g++ ninja
+before_script:
+  - git submodule update --init --recursive
+  - mkdir build
+script:
+  - cd build && cmake .. -G Ninja
+  - ninja
+  - ./abcs-tests
