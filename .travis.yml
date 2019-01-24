@@ -1,6 +1,6 @@
 language: cpp
 install:
-  - sudo apt-get install cmake mpfr g++ ninja
+  - sudo apt-get install cmake libmpfr-dev g++ ninja
 before_script:
   - git submodule update --init --recursive
   - mkdir build
