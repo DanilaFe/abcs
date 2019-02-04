@@ -637,10 +637,17 @@ These tests covered small, but important sections of the code. They tested the p
 #### Variables
 Variable assignment actually contributed significantly to the code coverage of the program. This is because variable assignment is actually a special case - `=` is a reserved operator. As such, the code must go through an entirely different path. All of that branch was covered if allocation failures are to be ignored, since assignment overrides any value stored under that name previously.
 
+In all of the above, we believe that we have handlded all of the special "edge" cases - the code is written to minimize those, which certainly helps. However, as mentioned several times, we're unable to handle the very special case of memory allocation failure - it's just not possible to do using manual testing, and it would be difficult to do even automatically - perhaps using a script that finds all uses of malloc, and tests all permutations of replacing "malloc" with "NULL".
+
 ## Results
 
 1. Test outcomes, bugs documented
 
+__ RYAN AND MATT FILL THIS IN __
+
 2. Estimated coverage achieved (number of units tested / est. number of units in the program).
+We believe that we achieved ~90% line coverage in tested areas. This is because code was written specifically to hit every possible if statement at least once. However, if we switch to looking at path coverage, this figure drops significantly. A large amount of control flow in abcs is dedicated to recovering from errors, and in a lot of cases, the only way for an error to propagate into a section of code is from an allocation further down the call stack. As such, most of the paths that are possible through the program are error recovery paths, and cannot be tested manually because we are unable to replicate allocation failure.
 
 ## Recommendations
+
+We recommend that the garbage collection code is examined and debugged to determine why memory usage does not increase following a large number of elements going out of scope. This is a very significant issue, as it can cause allocated memory to creep up as the program is kept open.
