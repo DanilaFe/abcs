@@ -30,9 +30,9 @@ __Input__:
 ```
 3+3
 ```
-__Expected output__: `6`
+__Expected output__: `6.00`
 
-__Real output__:
+__Real output__: `6.00`
 
 __Notes__: This is a sanity check test. There’s no reason it should fail.
 
