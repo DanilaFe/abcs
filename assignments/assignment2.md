@@ -403,13 +403,15 @@ weird = 0
 
 __Expected output__: 501, memory usage goes up until last line, at which point it decreases
 
-__Real output__:
+__Real output__: Segmentation fault as a result of executing waste_space(5000)
+```bash
+ > fun waste_space(x: num): (num)->num { if(x < 1) { fun waste_base(y: num): num { y + 1 } } else { waste_next = waste_space(x-1); fun waste_recursive(y: num): num {waste_next(y) + 1}}}
+r0 = Unable to convert to string.
+ > weird = waste_space(5000)
+Segmentation fault (core dumped)
+```
 
 __Notes__: waste_space creates a lot of closures. Functions and their lexical scope have dependency cycles: a scope can't be freed until the function referencing it is freed, and a function can't be freed until the scope it's referencing is freed. This should be handled by GC: when "weird" is no longer used, GC should catch it and free the entire chain.
-
-
-
-__Input__: ???
 
 
 
@@ -430,7 +432,14 @@ if(false) 3 else 4
 
 __Expected output__: 3, 4
 
-__Real output__:
+__Real output__: 3, 4
+```bash
+ > if(true) 3 else 4
+r0 = 3.00
+ > if(false) 3 else 4
+r1 = 4.00
+
+```
 
 __Notes__: if / else is an expression. It evalutes to a value. This value is given by the expression for each branch. For instance, if the "true" branch is taken, and 3 is evaluated, 3 also becomes the return value of the if/else. So, this test covers both the "check the condition" part of the capability, and the "evaluate to correct expression".
 
@@ -445,7 +454,13 @@ if () 3 else 4
 
 __Expected output__:  error in both cases
 
-__Real output__:
+__Real output__: Both resulted in errors
+```bash
+ > if 3 else 4
+Invalid expression.
+ > if () 3 else 4
+Invalid expression.
+```
 
 __Notes__: If/else needs a condition. If one is not provided, it should error.
 
@@ -460,7 +475,13 @@ if(add) 3 else 4
 
 __Expected output__: error in both cases
 
-__Real output__:
+__Real output__: Both resulted in errors
+```bash
+ > if(3) 3 else 4
+Invalid expression.
+ > if(add) 3 else 4
+Invalid expression.
+```
 
 __Notes__: If/else should not accept non-boolean values as conditions. This exercises the "REQUIRE_BOOL" branches of the code.
 
@@ -481,7 +502,17 @@ do {
 
 __Expected output__: 5, 5
 
-__Real output__: 
+__Real output__: 5, 5
+```bash
+ > x = 0
+r0 = 0.00e-1
+ > while(x < 5) { x = x + 1 }
+r1 = 5.00
+ > x = 0
+r2 = 0.00e-1
+ > do { x = x + 1 } while(x < 5)
+r3 = 5.00
+```
 
 __Notes__: Just like if / else, while is an expression. It should return the result of the last expression. The last time the condition is true is when x = 4, so after the body is evaluated, x will be equal to 5. The same happens with do/while: the last time the condition is true, x is equal to 5. So, the result will be 5.
 
@@ -497,7 +528,15 @@ do { x = x + 1 }
 
 __Expected output__: error both times
 
-__Real output__:
+__Real output__: Both statements resulted in errors
+```bash
+ > x = 0
+r0 = 0.00e-1
+ > while { x = x + 1}
+Invalid expression.
+ > do { x = x + 1 }
+Invalid expression.
+```
 
 __Notes__: Just like if/else, while and do while should behave correctly when no condition is given (they should error!)
 
@@ -513,7 +552,15 @@ do { x = x + 1} while (3)
 
 __Expected output__: error both times
 
-__Real output__:
+__Real output__: Neither resulted in errors
+```bash
+ > x = 0
+r0 = 0.00e-1
+ > while (3) {x = x + 1}
+r1 = ()
+ > do { x = x + 1 } while (3)
+r2 = 1.00
+```
 
 __Notes__: Once again, providing a condition of a non-boolean type should case an error in both while and do while.
 
@@ -534,7 +581,17 @@ do {
 
 __Expected output__: 0 in the first case, 2 in the second case.
 
-__Real output__:
+__Real output__: 0, then 2
+```bash
+ > x = 0
+r0 = 0.00e-1
+ > while(false) { x = 2 }
+r1 = ()
+ > x
+r2 = 0.00e-1
+ > do { x = 2 } while (false)
+r3 = 2.00
+```
 
 __Notes__: unlike while, do while should execute one iteration of the loop before testing the condition.
 
@@ -556,7 +613,7 @@ a
 ```
 __Expected output__: 1
 
-__Real output__:
+__Real output__: 1
 
 __Notes__: This is the baseline test for assigning to a variable. When a variable is given a value, the value can be accessed again by using the variable's name. This should persist between expressions.
 
@@ -568,7 +625,7 @@ a
 ```
 __Expected output__: 2
 
-__Real output__: 
+__Real output__: 2
 
 __Notes__: This exercises the "reassignment" branch of the code, which is supposed to release the memory associated with the previous value of the variable, and replace its content with a new value.
 
@@ -583,7 +640,17 @@ test
 ```
 __Expected output__: error, 3
 
-__Real output__: 
+__Real output__: error, 3
+```bash
+ > fun test(): num { 3 }
+r0 = Unable to convert to string.
+ > test = 3
+r1 = 3.00
+ > test()
+Invalid expression.
+ > test
+r2 = 3.00
+```
 
 __Notes__: When a variable is declared with the same name as a function, the same mechanism should apply as when a variable is declared with the same name as an existing variable: the value associated with the name should be replaced with the new one. Thus, the function "test" should stop existing.
 
@@ -595,7 +662,13 @@ a
 ```
 __Expected output__: error
 
-__Real output__:
+__Real output__: error
+```bash
+ > { a = 1 }
+r0 = 1.00
+ > a
+Invalid expression.
+```
 
 __Notes__: `a` was declared inside a different scope, and goes out of scope after the end of the curly braces. Thus, it should not be accessible in the top level scope.
 
@@ -609,7 +682,15 @@ x
 ```
 __Expected output__: error
 
-__Real output__:
+__Real output__: error
+```bash
+ > fun test(a: num): num { x = a }
+r0 = Unable to convert to string.
+ > test(3)
+r1 = 3.00
+ > x
+Invalid expression.
+```
 
 __Notes__: Once again, x was declared in a different scope. This should exercise the function call code that sets the "create new scope" flag, which is different from how it's handled in the `{}` test above.
 
