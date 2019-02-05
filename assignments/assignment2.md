@@ -723,8 +723,9 @@ In all of the above, we believe that we have handlded all of the special "edge" 
 ## Results
 
 1. Test outcomes, bugs documented
+- All arithmetic tests passed as expected
 
-__ RYAN AND MATT FILL THIS IN __
+
 
 2. Estimated coverage achieved (number of units tested / est. number of units in the program).
 We believe that we achieved ~90% line coverage in tested areas. This is because code was written specifically to hit every possible if statement at least once. However, if we switch to looking at path coverage, this figure drops significantly. A large amount of control flow in abcs is dedicated to recovering from errors, and in a lot of cases, the only way for an error to propagate into a section of code is from an allocation further down the call stack. As such, most of the paths that are possible through the program are error recovery paths, and cannot be tested manually because we are unable to replicate allocation failure.
