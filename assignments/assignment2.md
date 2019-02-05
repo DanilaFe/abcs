@@ -201,7 +201,7 @@ test(true, 3)
 
 __Expected output__: 3, true for the first two test cases, errors for the second two cases
 
-__Real output__: 3 good, 2 invalid
+__Real output__:  3, true, invalid, invalid
 
 ``` bash
  > fun test(x: 'T, y: 'T): 'T { x }
