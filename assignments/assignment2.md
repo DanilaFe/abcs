@@ -50,6 +50,11 @@ fun plus(x: num, y: num): num {
 __Expected output__: `error`
 
 __Real output__: `error`
+``` bash
+ > fun plus(x: num, y: num): num { x+y } 3+3
+Invalid expression.
+ >
+```
 
 __Notes__: Adding a second function with the same number of arguments is expected to crash the addition operator, since the overloading code can no longer figure out which function to call.
 
@@ -126,6 +131,10 @@ __Input__:
 __Expected output__: error
 
 __Real output__: error
+``` bash
+ > 3+!4
+Invalid expression.
+```
 
 __Notes__: This is a common error from an earlier version of the program. Depending on how the internal stack is used to re-order arguments into reverse polish notation, this could be equivalent to 3+4!, which is incorrect.  
 
@@ -157,6 +166,12 @@ __Input__:
 __Expected output__: error both times
 
 __Real output__: error both times
+``` bash
+ > (5-3
+Invalid expression.
+ > 5-3)
+Invalid expression.
+```
 
 __Notes__: This test exercises the error handling branches of the Shunting Yard algorithm: the parentheses are mismatched.
 
