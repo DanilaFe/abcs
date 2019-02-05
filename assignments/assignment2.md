@@ -201,7 +201,20 @@ test(true, 3)
 
 __Expected output__: 3, true for the first two test cases, errors for the second two cases
 
-__Real output__:
+__Real output__: 3 good, 2 invalid
+
+``` bash
+ > fun test(x: 'T, y: 'T): 'T { x }
+r0 = Unable to convert to string.
+ > test(3, 3)
+r1 = 3.00
+ > test(true, false)
+r2 = true
+ > test(3, true)
+Invalid expression.
+ > test(true, 3)
+Invalid expression.
+```
 
 __Notes__: this is a basic test for generics. As the code goes through the parameters, it stores the substituted variables into the scope table. Thus, it should accept any first parameter, but accept / reject the second parameter depending on whether or not it has the same type. Thus, the first two examples should work because of their matching types, but the second two should fail.
 
@@ -232,7 +245,35 @@ test(second, third)
 
 __Expected output__:  No errors in the first 4 (abcs can't print functions, but that's OK), errors in the last two
 
-__Real output__:
+__Real output__: No errors in first 4, errors in the last two
+
+``` bash
+ > fun one_or_another(x: 'T, y: 'T): (bool)->'T { fun test(b: bool): 'T { if(b) x else y } }
+r0 = Unable to convert to string.
+ > fun test(x: 'T, y: 'T): 'T { x }
+r1 = Unable to convert to string.
+ > first = one_or_another(1, 2);
+r2 = ()
+ > second = one_or_another(true, false);
+r3 = ()
+ > third = one_or_another(1, 3);
+r4 = ()
+ > fourth = one_or_another(false, true);
+r5 = ()
+ > test(first, first)
+Invalid expression.
+ > test(first, third)
+Invalid expression.
+ > test(second, second)
+Invalid expression.
+ > test(second, fourth)
+Invalid expression.
+ > test(first, second)
+Invalid expression.
+ > test(second, third)
+Invalid expression.
+
+```
 
 __Notes__: This tests the recursive type comparison functionality. The code that calls a function must recursively walk two trees in parallel, ensuring that the types are matched up. Thus, types which are the same at the top level but have differently-typed children are used (function, in this case)
 
@@ -257,7 +298,23 @@ test(3, true)
 
 __Expected output__: 3, 7, 6
 
-__Real output__:
+__Real output__: 3, 7 6
+
+``` bash
+ > fun test(a: num, b: num): num { a + b }
+r0 = Unable to convert to string.
+ > fun test(a: num): num { a }
+r1 = Unable to convert to string.
+ > fun test(a: num, b: bool): num {a*2}
+r2 = Unable to convert to string.
+ > test(3)
+r3 = 3.00
+ > test(3, 4)
+r4 = 7.00
+ > test(3, true)
+r5 = 6.00
+
+```
 
 __Notes__: The function should pick the second test function when one parameter is given, since function calls are supposed to be given precedence over partial application. The second call should go through both the first and third test, but only by accepted by the first one since the third test requires the second parameter to be a boolean. The last call should also go through both the first and the third call, but since the second parameter is a boolean, it should be accepted by the third function.
 
@@ -277,7 +334,17 @@ test(a, b)
 
 __Expected output__: error
 
-__Real output__:
+__Real output__: error
+``` bash
+ > fun test(a: num, b: num): num { a + b }
+r0 = Unable to convert to string.
+ > fun test(a: num, b: num): num { a -b }
+r1 = Unable to convert to string.
+ > test(a, b)
+Invalid expression.
+ >
+```
+
 
 __Notes__: This is an example of an ambigous function call. It's not clear which "test" should be called. abcs should generate an error here.
 
@@ -299,7 +366,25 @@ test(3, 4)
 
 __Expected output__: -3, error
 
-__Real output__:
+__Real output__: -3, error
+``` bash
+ > fun test(a: num, b: num): num {
+Invalid expression.
+ >     a + b
+Invalid expression.
+ > }
+Invalid expression.
+ > fun test(a: num, b: num): num { a + b }
+r0 = Unable to convert to string.
+ > fun test(a: num): num { a }
+r1 = Unable to convert to string.
+ > test = fun weird(a: num): num { -a }
+r2 = Unable to convert to string.
+ > test(3)
+r3 = -3.00
+ > test(3, 4)
+Invalid expression.
+```
 
 __Notes__: Assigning to a variable clears all the functions associated with that name. Thus, the first two declarations should be effectively erased.
 
@@ -326,7 +411,13 @@ a(7)
 
 Expected ouput: 10
 
-__Real output__:
+__Real output__: 10
+``` bash
+ > a = plus(3)
+r0 = Unable to convert to string.
+ > a(7)
+r1 = 1.00e1
+```
 
 __Notes__: This tests partial function application, as well as some branches on actual function calls. A function that's given less parameters than it takes returns another function, which takes the remaining parameters. Thus, add took one parameter and returned a, a function, which takes another parameter and returns the result of adding 3 to that parameter.
 
@@ -344,7 +435,15 @@ do_something(a, 7)
 
 __Expected output__: 10
 
-__Real output__:
+__Real output__: 10
+``` bash
+ > fun do_something(f: (num)->num, x: num): num { f(x) }
+r0 = Unable to convert to string.
+ > a = plus(3)
+r1 = Unable to convert to string.
+ > do_something(a, 7)
+r2 = 1.00e1
+```
 
 __Notes__: Here, the function a is passed as a value to do\_something, which accepts a function as its first parameter. This is the baseline test for first-class functions. Note: type checking for functions is covered in the previous capability tests, making it unnecessary to try it here.
 
@@ -364,7 +463,19 @@ x
 
 __Expected output__: 2
 
-__Real output__:
+__Real output__: 2
+``` bash
+ > x = 0
+r0 = 0.00e-1
+ > fun increment_x(): unit { x = x + 1; }
+r1 = Unable to convert to string.
+ > increment_x()
+r2 = ()
+ > increment_x()
+r3 = ()
+ > x
+r4 = 2.00
+```
 
 __Notes__: Here, the function must capture the scope in which it's declared, and therefore have access to the variable x. Modifying x inside the function should affect x outside the function.
 
@@ -388,7 +499,19 @@ a()
 
 __Expected output__: 4, 5, 6
 
-__Real output__:
+__Real output__: 4, 5, 6
+``` bash
+ > fun adder(start: num): () -> num {fun add(): num {prev = start;start = start + 1;prev}}
+r0 = Unable to convert to string.
+ > a = adder(4)
+r1 = Unable to convert to string.
+ > a()
+r2 = 4.00
+ > a()
+r3 = 5.00
+ > a()
+r4 = 6.00
+```
 
 __Notes__: Functions should be able to capture variables that would otherwise be completely unreachable. For instance, once the call to "adder" completes, there's no way to read the start variable from outside. However, since the function was declared inside of it, it should be able to read "start", as it captured the scope in which it was declared.
 
