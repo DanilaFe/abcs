@@ -862,7 +862,8 @@ In all of the above, we believe that we have handlded all of the special "edge" 
 
 1. Test outcomes, bugs documented
 - All arithmetic tests passed as expected
-
+- All function call tests passed as expected
+- All higher order function tests passed as expected
 
 
 2. Estimated coverage achieved (number of units tested / est. number of units in the program).
