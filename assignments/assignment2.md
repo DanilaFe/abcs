@@ -30,9 +30,9 @@ __Input__:
 ```
 3+3
 ```
-__Expected output__: `6.00`
+__Expected output__: `6`
 
-__Real output__: `6.00`
+__Real output__: `6`
 
 __Notes__: This is a sanity check test. There’s no reason it should fail.
 
@@ -49,7 +49,7 @@ fun plus(x: num, y: num): num {
 
 __Expected output__: `error`
 
-__Real output__:
+__Real output__: `error`
 
 __Notes__: Adding a second function with the same number of arguments is expected to crash the addition operator, since the overloading code can no longer figure out which function to call.
 
@@ -66,7 +66,7 @@ fun plus(x: num): num {
 
 __Expected output__: 6
 
-__Real output__:
+__Real output__: 6
 
 __Notes__: Adding a second function with less arguments than the addition operator takes should not crash the interpreter, as it is not a viable candidate when in the overload resolving code.
 
@@ -83,7 +83,7 @@ fun plus(x: num, y: num, z: num): num {
 
 __Expected output__: 6
 
-__Real output__:
+__Real output__: 6
 
 __Notes__: regular function calls should be checked before partial function application, so this should actually work, although the 3-parameter add function _can_ be used with two arguments.
 
@@ -97,7 +97,7 @@ __Input__:
 
 __Expected output__: 3
 
-__Real output__:
+__Real output__: 3
 
 __Notes__: this is a test to differentiate operators that are both infix and prefix. This is equivalent to 1-(-2), and is the only case that covers this branch in the code.
 
@@ -111,7 +111,7 @@ __Input__:
 
 __Expected output__: 6
 
-__Real output__:
+__Real output__: 6
 
 __Notes__: Sanity check test for postfix operators
 
@@ -125,7 +125,7 @@ __Input__:
 
 __Expected output__: error
 
-__Real output__:
+__Real output__: error
 
 __Notes__: This is a common error from an earlier version of the program. Depending on how the internal stack is used to re-order arguments into reverse polish notation, this could be equivalent to 3+4!, which is incorrect.  
 
@@ -135,7 +135,7 @@ __Input__:
 ```
 __Expected output__: 6563
 
-__Real output__: 
+__Real output__:  6563
 
 __Notes__: This is a test of order of operations. It's very important that this is satisfied. Exponentiation is used twice to make sure its right associativity is correctly implemented.
 
@@ -145,7 +145,7 @@ __Input__:
 ```
 __Expected output__: 6
 
-__Real output__:
+__Real output__: 6
 
 __Notes__: This is a test of parenthesized expressions. They should behave like they do in...normal math.
 
@@ -156,7 +156,7 @@ __Input__:
 ```
 __Expected output__: error both times
 
-__Real output__:
+__Real output__: error both times
 
 __Notes__: This test exercises the error handling branches of the Shunting Yard algorithm: the parentheses are mismatched.
 
