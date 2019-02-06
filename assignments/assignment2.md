@@ -26,6 +26,8 @@ Additionally, just like any user-facing capability, arithmetic operations must h
 
 Internally, abcs uses functions to represent operators. As such, declaring a function with a conflicting name has a high chance of breaking the given operator.
 
+This test covers a lot of the hot code paths in the parser - specifically, those related to arithmetic and operator precedense. These branches are used in almost all complex code, as the core of abcs is the evaluation of mathematical expressions. This test also covers the basic function calling functions, which are needed since operators are synomyms for their correspodning functions ((+) is the same as plus). However, it doesn't handle function call parsing - this will be covered in the next test.
+
 __Input__:
 ```
 3+3
@@ -185,7 +187,7 @@ __Description:__ A lot of complexity lies under the surface of a simple trigonom
 
 3. Function overloading (one function, many functions, variable with same name)
 
-
+This test covers all the function call parsing, as well as the same function call evaluation functions that the arithmetic test covered. However, it also covers generics and type substitution, as well as their parsing.
 
 __Input__:
 
@@ -400,7 +402,7 @@ __Description:__ abcs, like many modern programming languages, features first cl
 
 3. Closures: functions capture the scope in which they’re created, allowing access to variables outside of the function.
 
-
+This test covers the partial function application functionality that was not tested by previous tests. It doesn't provide significant added benefit for closure / scope testing, as scopes are handled using the exact same code even when a new lexical scope is not created. Since assignment is used in this test, it also partially covers some of the variable assignment code from the following tests.
 
 __Input__:
 
@@ -521,7 +523,7 @@ __Notes__: Functions should be able to capture variables that would otherwise be
 
 __Description:__ Garbage collection is an integral feature of interpreted (and some compiled) programming languages. If the memory is not to managed manually (which it isn’t at the desired level of abstraction of abcs), it must be managed by the language. Some programming languages use reference counting to handle this: Rust, for instance, does not have a garbage collector. However, this is only possible because of its complex ownership system, which abcs does not have. Functionality such as functions and scopes requires dependency cycles. Since abcs may be open for prolonged periods of time, it’s important that memory usage does not creep up. Garbage collection is the only other way to find and free unused memory, and therefore serves a key purpose in abcs.
 
-
+Though this is useful for stress-testing the GC, there's no added coverage. The code triggered by these tests is exactly the same code that runs normally. However, these tests should make it much easier to spot garbage collection errors, as they are deliberately targetted at that.
 
 __Input__:
 
@@ -551,7 +553,34 @@ Segmentation fault (core dumped)
 
 __Notes__: waste_space creates a lot of closures. Functions and their lexical scope have dependency cycles: a scope can't be freed until the function referencing it is freed, and a function can't be freed until the scope it's referencing is freed. This should be handled by GC: when "weird" is no longer used, GC should catch it and free the entire chain.
 
+__Input__:
 
+```
+fun waste_space(x: num): (num)->num {
+    if(x < 1) {
+        fun waste_base(y: num): num { y + 1 }
+    } else {
+        waste_next = waste_space(x - 1);
+        fun waste_recursive(y: num): num { waste_next(y) + 1}
+    }
+}
+x = 0
+y = 0
+while(x < 100) { y = waste_space(500); x = x + 1 }
+```
+Expected output: No errors, memory use not increase significantly after the last line is run.
+
+Real output: Memory usage soared to 1GB.
+```bash
+ > fun waste_space(x: num): (num)->num { if(x < 1) { fun waste_base(y: num): num { y + 1 } } else { waste_next = waste_space(x-1); fun waste_recursive(y: num): num {waste_next(y) + 1}}}
+r0 = Unable to convert to string.
+ > x = 0
+r1 = 0.00e-1
+ > y = 0
+r2 = 0.00e-1
+> while(x < 100) { y = waste_space(500); x = x + 1 }
+r3 = 1.00e2
+```
 
 #### Test: Control flow
 
@@ -560,6 +589,8 @@ __Description:__ We’ve talked about functions and power users above, but witho
 1. Condition requirements (non-boolean condition, missing condition)
 
 2. Correct evaluation (branch to if branch on true condition, branch to else on false condition)
+
+This test covers the if/else/while/do-while parsing, as well as the corresponding lines in the interpreter. These are lines that haven't been covered before, at all. This test thoroughly covers all non-error handling sections of relevant code.
 
 __Input__:
 
@@ -740,9 +771,9 @@ __Description:__ Variables are very useful for storing results of past computati
 
 1. Variables named after functions. Intuitively, this should override the function declaration.
 
-2. Variables named after types. Intuitively, this should cause an explicit error.
+2. Variables declared in scopes, then let go out of scope. For example, a variable in a function should not be visible outside.
 
-3. Variables declared in scopes, then let go out of scope. For example, a variable in a function should not be visible outside.
+This test covers the same code as previous tests, but with a more targetted aporoach towards variables. Scoping especially, though covered by every execution of any expression, must behave as expected.
 
 __Input__:
 ```
