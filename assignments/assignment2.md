@@ -245,7 +245,7 @@ test(second, third)
 
 __Expected output__:  No errors in the first 4 (abcs can't print functions, but that's OK), errors in the last two
 
-__Real output__: No errors in first 4, errors in the last two
+__Real output__: Errors in all calls to test.
 
 ``` bash
  > fun one_or_another(x: 'T, y: 'T): (bool)->'T { fun test(b: bool): 'T { if(b) x else y } }
@@ -860,15 +860,10 @@ In all of the above, we believe that we have handlded all of the special "edge" 
 
 ## Results
 
-1. Test outcomes, bugs documented
-- All arithmetic tests passed as expected
-- All function call tests passed as expected
-- All higher order function tests passed as expected
+While most of the manual tests passed, each group member discovered a bug. The first bug was in the comparison of function types - while the test expected functions with identical signatures to be correctly substituted into another generic function, this was not the case. Furthermore, upon writing an "identity" function which simply returns a generic variable given to it, we encountered as segmentation fault. This is a very serious error. Another issue that we discovered was in the evlauation of non-boolean expressions in conditions of while and do/while loops. While an error was expected in this case, one was not produced, and the non-boolean value was treated as "false". This likely isn't a significant issue for the user, but it is incorrect behavior nonetheless. Lastly, we found a bug in garbage collection - while a segmentation fault was caused by a stack overflow while trying to reproduce the bug, the real issue was not in the crash: memory is not released after the data goes out of scope. It's difficult to determine the root cause of this, as even simple memory allocations with dependency cycles form fairly complex graphs. This is probably the most significant bug we discovered.
 
-
-2. Estimated coverage achieved (number of units tested / est. number of units in the program).
 We believe that we achieved ~90% line coverage in tested areas. This is because code was written specifically to hit every possible if statement at least once. However, if we switch to looking at path coverage, this figure drops significantly. A large amount of control flow in abcs is dedicated to recovering from errors, and in a lot of cases, the only way for an error to propagate into a section of code is from an allocation further down the call stack. As such, most of the paths that are possible through the program are error recovery paths, and cannot be tested manually because we are unable to replicate allocation failure.
 
 ## Recommendations
 
-We recommend that the garbage collection code is examined and debugged to determine why memory usage does not increase following a large number of elements going out of scope. This is a very significant issue, as it can cause allocated memory to creep up as the program is kept open.
+We recommend that the garbage collection code is examined and debugged to determine why memory usage does not decrease following a large number of elements going out of scope. This is a very significant issue, as it can cause allocated memory to creep up as the program is kept open. Similarly, we recommend the investigation of error checking in while/do-while loops, as well as recursive type substitution.
