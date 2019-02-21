@@ -15,7 +15,7 @@ Due February 21, 2019 at 11:59 PM
 There should be at least one File/Section per team member. Each section should be 200 ~ 400 lines. Delete extraneous headers. You should identify any faults or “code smells” you find and include suggested fixes. For each section, briefly justify why you chose that section to review. 
 
 ### Section 1 (parser.c, Matthew Sessions) 
-####Lines completed: 800 of 1182
+####Lines completed: 400 of 1182
 
 Why is this in a do/while for 0
 
@@ -79,6 +79,8 @@ libab_result _parse_expression(struct parser_state* state,
                                libab_tree** store_into);
 libab_result _parse_type(struct parser_state* state, libab_ref* ref);
 ```
+### Section 2 (parser.c, Matthew Sessions) 
+####Lines completed: 800 of 1182
 
 These functions do effectively the same thing, could use a macro to define these functions
 parser.c line 409
