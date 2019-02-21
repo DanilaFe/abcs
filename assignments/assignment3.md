@@ -125,9 +125,9 @@ if (result == LIBAB_SUCCESS) {
 }
 ```
 
-### Section 2 (interpreter.c, Danila Fedorin)
+### Section 3 (interpreter.c, Danila Fedorin)
 
-### Section 3 (gc.c, Ryan Alder)
+### Section 4 (gc.c, Ryan Alder)
 Function libab_gc_visit_children is never actually used
 
 gc.c lines 17-19
