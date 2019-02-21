@@ -101,4 +101,19 @@ void _gc_save(libab_ref_count* count, void* data) {
         _libab_gc_list_append(list, count);
         _gc_count_visit_children(count, _gc_save, data);
     }
-}```
+}
+```
+
+May want to keep the original style, or switch all loops to this style. Previously head was declared outside of the while loop and incremented at the end of each loop.
+
+gc.c line 85
+```
+while ((head = list->head_sentinel.next) != &list->tail_sentinel)
+```
+
+head->prev->next is the same as list->head_sentinel.next, may want to change to make it more readable
+
+gc.c line 86
+```
+head->prev->next = head->next;
+```
