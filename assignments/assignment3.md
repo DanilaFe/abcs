@@ -79,3 +79,13 @@ libab_result _parse_type(struct parser_state* state, libab_ref* ref);
 ```
 
 ### Section 2 (interpreter.c, Danila Fedorin)
+
+### Section 3 (gc.c, Ryan Alder)
+Function libab_gc_visit_children is never actually used
+
+gc.c lines 17-19
+```
+void libab_gc_visit_children(libab_ref* ref, libab_visitor_function_ptr func, void* data) {
+    if(!ref->null) _gc_count_visit_children(ref->count, func, data);
+}
+```
