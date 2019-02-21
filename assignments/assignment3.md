@@ -89,3 +89,16 @@ void libab_gc_visit_children(libab_ref* ref, libab_visitor_function_ptr func, vo
     if(!ref->null) _gc_count_visit_children(ref->count, func, data);
 }
 ```
+
+Unnecessary to declare list here, just pass data instead to \_libab_gc_list_append
+
+gc.c lines 48-55
+```
+void _gc_save(libab_ref_count* count, void* data) {
+    libab_gc_list* list = data;
+    if(count->visit_children && count->gc >= 0) {
+        count->gc = -1;
+        _libab_gc_list_append(list, count);
+        _gc_count_visit_children(count, _gc_save, data);
+    }
+}```
