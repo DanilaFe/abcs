@@ -263,7 +263,7 @@ head->prev->next = head->next;
 
 _Lines completed: 0-200 of 1357 (interpreter.c)_
 
-No reason to assign result to LIBAB_SUCCESS because it is never used. Overwritten on either line 16 or 21 (_interpreter.c line 10_)
+No reason to assign result to LIBAB\_SUCCESS because it is never used. Overwritten on either line 16 or 21 (_interpreter.c line 10_)
 ```
 libab_result result = LIBAB_SUCCESS;
 ```
@@ -293,7 +293,7 @@ We declare placeholder here, then assign it on line 105. We can do the declarati
 int placeholder;
 ```
 
-This function that is called just checks to see if libab_ref_get(into) is NULL, and if so another function is called. Why can't we just copy those two lines here? Is it really worth having another helper function just for a NULL check? (_interpreter.c line 132_)
+This function that is called just checks to see if libab\_ref\_get(into) is NULL, and if so another function is called. Why can't we just copy those two lines here? Is it really worth having another helper function just for a NULL check? (_interpreter.c line 132_)
 ```
 _interpreter_search_type_param(params, scope, name, &into);
 ```
