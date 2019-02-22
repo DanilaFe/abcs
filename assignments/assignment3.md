@@ -12,15 +12,15 @@ Github Project Fork URL: [https://github.com/sessionm21/abcs](https://github.com
 ### Section 1 (parser.c, Matthew Sessions) 
 _Lines completed: 0-400 of 1182_
 
-__Purpose:__ This section was revied because it is critically important to the
+#### Purpose: 
+This section was reviewed because it is critically important to the
 final program. Since all data fed into abcs goes through the parser
 before any processing happens, it's highly important that all code here
 is of high quality. We have found no significant defects, although
 some issues with code style have been pointed out.
 
-Why is this in a do/while for 0
-
-parser.c line 23
+#### Notes:
+Why is this in a do/while for 0 (_parser.c line 23_)
 ```
 /* Utilities */
 #define PARSE_CHILD(result, state, parse_function, parse_into, into)           \
@@ -36,9 +36,7 @@ parser.c line 23
 ```
 
 
-va\_list args is not used within function, used for function signature
-
-parser.c line 43
+va\_list args is not used within function, used for function signature (_parser.c line 43_)
 ```
 int _parser_foreach_free_tree(void* data, va_list args) {
     libab_tree_free_recursive(data);
@@ -46,17 +44,13 @@ int _parser_foreach_free_tree(void* data, va_list args) {
 }
 ```
 
-Init function could be higher up in source file, linked list has a typedef but parser\_state does not
-
-parser.c line 61
+Init function could be higher up in source file, linked list has a typedef but parser\_state does not (_parser.c line 61_)
 ```
 void _parser_state_init(struct parser_state* state, ll* tokens,
                         const char* string, libab_table* table) 
 ```
 
-Would these be better as macros?
-
-parser.c line 77
+Would these be better as macros? (_parser.c line 77_)
 ```
 int _parser_is_char(struct parser_state* state, char to_expect) {
     return (state->current_match && state->current_match->type == TOKEN_CHAR &&
@@ -71,9 +65,7 @@ int _parser_eof(struct parser_state* state) {
 }
 ```
 
-Kinda weird to have function prototypes partway down the file
-
-parser.c line 118
+Kinda weird to have function prototypes partway down the file (_parser.c line 118_)
 ```
 libab_result _parse_block(struct parser_state*, libab_tree**, int);
 libab_result _parse_expression(struct parser_state* state,
@@ -84,12 +76,13 @@ libab_result _parse_type(struct parser_state* state, libab_ref* ref);
 ### Section 2 (parser.c, Matthew Sessions) 
 _Lines completed: 400-800 of 1182_
 
-__Purpose:__ The same as section 1. However, because code reviews
+#### Purpose
+The same as section 1. However, because code reviews
 should not be longer than 400 lines at a time as per the IBM guidelines,
 this review was conducted some time after the initial review.
 
-These functions do effectively the same thing, could use a macro to define these functions
-parser.c line 409
+#### Notes
+These functions do effectively the same thing, could use a macro to define these functions (_parser.c line 409_)
 ```
 libab_result _parse_true(struct parser_state* state, libab_tree** store_into) {
     libab_result result = _parser_consume_type(state, TOKEN_KW_TRUE);
@@ -123,8 +116,7 @@ libab_result _parse_false(struct parser_state* state, libab_tree** store_into) {
     return result;
 }
 ```
-Consume statements could be written as macros
-parser.c 597, etc.
+Consume statements could be written as macros (_parser.c 597, etc._)
 ```
 if (result == LIBAB_SUCCESS) {
     result = _parser_consume_char(state, '(');
@@ -134,7 +126,9 @@ if (result == LIBAB_SUCCESS) {
 ### Section 3 (interpreter.c, Danila Fedorin)
 _Lines completed: 1046-1284 of 1356_
 
-__Purpose:__ The interpreter is the heart of libabacus, and
+#### Purpose
+
+The interpreter is the heart of libabacus, and
 therefore the heart of abcs. It contains all of the code responsible
 for executing the scripting language, which includes not just the logic
 behind function calls, variable declarations, and the like, but also
@@ -142,20 +136,18 @@ the type substituion algorithms, which we now know contain a bug. Furthermore,
 interpreter.c is nearly 2k source lines of code, which statistically suggests
 there will be issues.
 
+#### Notes
+
 `_interpreter_run` is a very long function (spans 113 lines). This is a code smell.
 
 Preventing scope creation will work for only one node, not any deeper. This may be an issue,
-or at least a pitfall that needs to be documented.
-
-interpreter.c line 1178
+or at least a pitfall that needs to be documented. (_interpreter.c line 1178_)
 ```
 int needs_scope = (mode == SCOPE_FORCE) || 
     (mode == SCOPE_NORMAL && libab_tree_has_scope(tree->variant));
 ```
 
-Is a "base" tree type even necessary its behavior has no distinction from a code block?
-
-interpreter.c line 1188
+Is a "base" tree type even necessary its behavior has no distinction from a code block? (_interpreter.c line 1188_)
 ```
 else if (tree->variant == TREE_BASE || tree->variant == TREE_BLOCK)
 ```
@@ -163,47 +155,35 @@ else if (tree->variant == TREE_BASE || tree->variant == TREE_BLOCK)
 Why are "void" nodes even necessary, if they don't do anything? Aren't they just wasting space?
 Perhaps we can assume "NULL" is a valid parameter to the function, and return unit in that case?
 I know most functions implictly assume valid parameters, and NULL isn't a "valid parameter" in
-the common way, but still. Perhaps this will make some special cases easier down the line.
-
-interpreter.c line 1199
+the common way, but still. Perhaps this will make some special cases easier down the line. (_interpreter.c line 1199_)
 ```
 else if (tree->variant == TREE_VOID) {
 ```
 
-Make sure operator returned won't be NULL.
-
-interpreter.c line 1208
+Make sure operator returned won't be NULL. (_interpreter.c line 1208_)
 ```
 libab_operator* to_call = libab_table_search_operator(
     libab_ref_get(scope), tree->string_value, OPERATOR_INFIX);
 ```
 
-Is `into` always initialized? Or will there be a `ref_free` call missing in some cases?
-
-interpreter.c line 1235
+Is `into` always initialized? Or will there be a `ref_free` call missing in some cases? (_interpreter.c line 1235_)
 ```
 libab_ref_copy(&function, into);
 ```
 
-Shouldn't we error on unexpected tree type?
-
-interpreter.c line 1276
+Shouldn't we error on unexpected tree type? (_interpreter.c line 1276_)
 ```
 libab_get_unit_value(state->ab, into);
 ```
 
-This is a declaration after a function call, which ins't C89 compliant.
-
-interpreter.c line 1151
+This is a declaration after a function call, which ins't C89 compliant. (_interpreter.c line 1151_)
 ```
 libab_result result = _interpreter_run(state, tree, &output, scope, mode);
 libab_value* value;
 libab_parsetype* type;
 ```
 
-Output value isn't defined when an error occurs.
-
-interpreter.c line 1167
+Output value isn't defined when an error occurs. (_interpreter.c line 1167_)
 ```
 if(result == LIBAB_SUCCESS) {
     value = libab_ref_get(&output);
@@ -223,17 +203,13 @@ return result;
 
 Perhaps it's a good idea, as Matt pointed out, to move away form va-based generic arguments
 to "map" and similar-in-nature functions. A void pointer which can be cast to a struct may
-not be such a bad idea.
-
-interpreter.c line 1058
+not be such a bad idea. (_interpreter.c line 1058_)
 ```
 int _interpreter_foreach_insert_function_param(
         void* data, va_list args) {
 ```
 
-This might be better as a macro.
-
-interpreter.c line 1040
+This might be better as a macro. (_interpreter.c line 1040_)
 
 ```
 int _interpreter_compare_function_param(
@@ -246,25 +222,24 @@ int _interpreter_compare_function_param(
 ### Section 4 (gc.c, Ryan Alder)
 _Lines completed: 0-100 of 100 (Entire file)_
 
-__Purpose:__ As with interpreter.c, we have discovered a problem with GC code
+#### Purpose
+As with interpreter.c, we have discovered a problem with GC code
 during manual testig: it didn't seem to work in all cases. Furthermore, as
 described in the previous assignment, garbage collection is integral to
 keeping abcs running for longer periods of time (which is assumed to be
 a common pattern in the usage of calculators). Thus, the source code
 needs to be examined for potential issues, and later, tested automatically.
 
-Function `libab_gc_visit_children` is never actually used
+#### Notes
 
-gc.c lines 17-19
+Function `libab_gc_visit_children` is never actually used (_gc.c lines 17-19_)
 ```
 void libab_gc_visit_children(libab_ref* ref, libab_visitor_function_ptr func, void* data) {
     if(!ref->null) _gc_count_visit_children(ref->count, func, data);
 }
 ```
 
-Unnecessary to declare list here, just pass data instead to `_libab_gc_list_append`
-
-gc.c lines 48-55
+Unnecessary to declare list here, just pass data instead to `_libab_gc_list_append` (_gc.c lines 48-55_)
 ```
 void _gc_save(libab_ref_count* count, void* data) {
     libab_gc_list* list = data;
@@ -276,16 +251,12 @@ void _gc_save(libab_ref_count* count, void* data) {
 }
 ```
 
-May want to keep the original style, or switch all loops to this style. Previously head was declared outside of the while loop and incremented at the end of each loop.
-
-gc.c line 85
+May want to keep the original style, or switch all loops to this style. Previously head was declared outside of the while loop and incremented at the end of each loop. (_gc.c line 85_)
 ```
 while ((head = list->head_sentinel.next) != &list->tail_sentinel)
 ```
 
-`head->prev->next` is the same as `list->head_sentinel.next`, may want to change to make it more readable
-
-gc.c line 86
+`head->prev->next` is the same as `list->head_sentinel.next`, may want to change to make it more readable (_gc.c line 86_)
 ```
 head->prev->next = head->next;
 ```
