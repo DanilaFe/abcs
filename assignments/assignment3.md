@@ -14,7 +14,9 @@ Due February 21, 2019 at 11:59 PM
 
 There should be at least one File/Section per team member. Each section should be 200 ~ 400 lines. Delete extraneous headers. You should identify any faults or “code smells” you find and include suggested fixes. For each section, briefly justify why you chose that section to review. 
 
-### Section 1 (parser.c, Matthew Sessions)
+### Section 1 (parser.c, Matthew Sessions) 
+####Lines completed: 400 of 1182
+
 Why is this in a do/while for 0
 
 parser.c line 23
@@ -77,10 +79,55 @@ libab_result _parse_expression(struct parser_state* state,
                                libab_tree** store_into);
 libab_result _parse_type(struct parser_state* state, libab_ref* ref);
 ```
+### Section 2 (parser.c, Matthew Sessions) 
+####Lines completed: 800 of 1182
 
-### Section 2 (interpreter.c, Danila Fedorin)
+These functions do effectively the same thing, could use a macro to define these functions
+parser.c line 409
+```
+libab_result _parse_true(struct parser_state* state, libab_tree** store_into) {
+    libab_result result = _parser_consume_type(state, TOKEN_KW_TRUE);
+    if(result == LIBAB_SUCCESS) {
+        if ((*store_into = malloc(sizeof(**store_into)))) {
+            (*store_into)->variant = TREE_TRUE;
+        } else {
+            result = LIBAB_MALLOC;
+        }
+    }
 
-### Section 3 (gc.c, Ryan Alder)
+    if(result != LIBAB_SUCCESS) {
+        *store_into = NULL;
+    }
+    return result;
+}
+
+libab_result _parse_false(struct parser_state* state, libab_tree** store_into) {
+    libab_result result = _parser_consume_type(state, TOKEN_KW_FALSE);
+    if(result == LIBAB_SUCCESS) {
+        if ((*store_into = malloc(sizeof(**store_into)))) {
+            (*store_into)->variant = TREE_FALSE;
+        } else {
+            result = LIBAB_MALLOC;
+        }
+    }
+
+    if(result != LIBAB_SUCCESS) {
+        *store_into = NULL;
+    }
+    return result;
+}
+```
+Consume statements could be written as macros
+parser.c 597, etc.
+```
+if (result == LIBAB_SUCCESS) {
+    result = _parser_consume_char(state, '(');
+}
+```
+
+### Section 3 (interpreter.c, Danila Fedorin)
+
+### Section 4 (gc.c, Ryan Alder)
 Function libab_gc_visit_children is never actually used
 
 gc.c lines 17-19
