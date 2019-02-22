@@ -219,8 +219,8 @@ int _interpreter_compare_function_param(
 }
 ```
 
-### Section 4 (gc.c, Ryan Alder)
-_Lines completed: 0-100 of 100 (Entire file)_
+### Section 4 (gc.c and interpreter.c, Ryan Alder)
+_Lines completed: 0-100 of 100 (Entire file - gc.c)_
 
 #### Purpose
 As with interpreter.c, we have discovered a problem with GC code
@@ -260,6 +260,50 @@ while ((head = list->head_sentinel.next) != &list->tail_sentinel)
 ```
 head->prev->next = head->next;
 ```
+
+_Lines completed: 0-200 of 1357 (interpreter.c)_
+
+No reason to assign result to LIBAB_SUCCESS because it is never used. Overwritten on either line 16 or 21 (_interpreter.c line 10_)
+```
+libab_result result = LIBAB_SUCCESS;
+```
+
+Found some resources online stating that good style for c is to declare structs/globals/etc at the top of the file. Seems a little odd to have it declared here (_interpreter.c line 56_)
+```
+struct interpreter_state {...}
+```
+
+This is set in line 65 but never accessed, may not be necessary? Or may be used in later iterations? (_interpreter.c line 58_)
+```
+libab_table* base_table;
+```
+
+Why is this empty function here? (_interpreter.c line 68_)
+```
+void _interpreter_free(struct interpreter_state* state) {}
+```
+
+Same as above, setting result when it is not necessary (_interpreter.c line 73_)
+```
+libab_result result = LIBAB_SUCCESS
+```
+
+We declare placeholder here, then assign it on line 105. We can do the declaration and assignment together on line 102 (_interpreter.c line 102_)
+```
+int placeholder;
+```
+
+This function that is called just checks to see if libab_ref_get(into) is NULL, and if so another function is called. Why can't we just copy those two lines here? Is it really worth having another helper function just for a NULL check? (_interpreter.c line 132_)
+```
+_interpreter_search_type_param(params, scope, name, &into);
+```
+
+Mentioned this earlier, why can't we just do the assignment on the same line? We are doing this for other variables above and below these liens. Delete these lines and put the declaration along with the assignments on lines 158 and 159. (_interpreter.c lines 153 and 154_)
+```
+int left_placeholder;
+int right_placeholder;
+```
+
 
 ## Summary:
 
