@@ -1,6 +1,5 @@
 #include "trie_test.hpp"
 
-
 greatest_test_res test_trie_init() {
   libab_trie trie;
   libab_trie_init(&trie);
@@ -84,5 +83,4 @@ SUITE(trie_suite) {
   RUN_TEST(test_trie_init);
   RUN_TEST(test_trie_clear);
   RUN_TEST(test_trie_put_get);
-  RUN_TEST(test_trie_clear);
 }
