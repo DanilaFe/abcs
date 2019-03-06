@@ -12,14 +12,15 @@ greatest_test_res add_node() {
   libab_ref ref;
   libab_gc_list list;
   libab_gc_list_init(&list);
-  libab_ref_count node;
-  ref.count = &node;
+  libab_ref_count* node = new libab_ref_count;
+  ref.count = node;
   libab_gc_add(&ref, NULL, &list);
-  ASSERT_EQ(list.head_sentinel.next, &node);
-  ASSERT_EQ(list.tail_sentinel.prev, &node);
-  ASSERT_EQ(node.next, &list.tail_sentinel);
-  ASSERT_EQ(node.prev, &list.head_sentinel);
+  ASSERT_EQ(list.head_sentinel.next, node);
+  ASSERT_EQ(list.tail_sentinel.prev, node);
+  ASSERT_EQ(node->next, &list.tail_sentinel);
+  ASSERT_EQ(node->prev, &list.head_sentinel);
   ASSERT_EQ(ref.count->visit_children, NULL);
+  delete node;
   PASS();
 }
 
