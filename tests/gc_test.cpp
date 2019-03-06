@@ -28,50 +28,23 @@ void helper_free(void* data) {
   delete [] (int*)data;
 }
 
+void dummy_visit(void* self, libab_visitor_function_ptr f, void*) {
+   // nothing
+}
+
 greatest_test_res test_run() {
   // would also benefit from a test with valgrind
   libab_gc_list list;
   libab_gc_list_init(&list);
-  libab_ref_count* ref1 = new libab_ref_count;
+  libab_ref ref1;
+  libab_ref_new(&ref1, new int[5], helper_free);
+  libab_gc_add(&ref1, dummy_visit, &list);
 
-  ref1->data = new int[5];
-  ref1->free_func = helper_free;
-  ref1->strong = 0;
-  ref1->weak = 0;
-  libab_ref_count* before;
-  if(ref1->next) ref1->next->prev = ref1->prev;
-  if(ref1->prev) ref1->prev->next = ref1->next;
-  before = &list.tail_sentinel;
-  ref1->next = before;
-  ref1->prev = before->prev;
-  before->prev->next = ref1;
-  before->prev = ref1;
   libab_gc_run(&list);
 
   ASSERT_EQ(list.head_sentinel.next, &list.tail_sentinel);
   ASSERT_EQ(list.tail_sentinel.prev, &list.head_sentinel);
-
-  libab_gc_list_init(&list);
-  libab_gc_list list1;
-  libab_gc_list_init(&list1);
-  libab_ref_count* ref2 = new libab_ref_count;
-
-  ref2->data = NULL;
-  ref2->free_func = NULL;
-  ref2->strong = 0;
-  ref2->weak = 0;
-  libab_ref_count* before1;
-  if(ref2->next) ref2->next->prev = ref2->prev;
-  if(ref2->prev) ref2->prev->next = ref2->next;
-  before1 = &list1.tail_sentinel;
-  ref2->next = before1;
-  ref2->prev = before1->prev;
-  before1->prev->next = ref2;
-  before1->prev = ref2;
-  libab_gc_run(&list1);
-
-  ASSERT_EQ(list.head_sentinel.next, &list.tail_sentinel);
-  ASSERT_EQ(list.tail_sentinel.prev, &list.head_sentinel);
+  libab_ref_free(&ref1);
 
   PASS();
 }
