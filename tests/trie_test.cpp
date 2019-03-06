@@ -77,6 +77,8 @@ greatest_test_res test_trie_put_get() {
  
   ASSERT_EQ(derp->empty_list.head->data, &trie);
 
+  libab_trie_clear(&trie);
+
   PASS();
 }
 
