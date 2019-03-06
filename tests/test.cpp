@@ -2,6 +2,7 @@
 #include "greatest.h"
 #include "refcount_test.hpp"
 #include "gc_test.hpp"
+#include "trie_test.hpp"
 
 /* Sanity check test */
 TEST one_should_equal_one() {
@@ -16,5 +17,6 @@ int main(int argc, char** argv) {
     RUN_TEST(one_should_equal_one);
     RUN_SUITE(refcount_suite);
     RUN_SUITE(gc_suite);
+    RUN_SUITE(trie_suite);
     GREATEST_MAIN_END();
 }
